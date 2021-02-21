@@ -1,0 +1,1 @@
+The programs in src folder aim to process the raw game data(in Json format) to get the training data we need.
