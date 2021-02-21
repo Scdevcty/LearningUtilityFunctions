@@ -1,0 +1,6 @@
+This folder contains our main codes.
+
+learn_cf_ga.cpp is our main program,
+function_to_learn_icn.cpp/hpp contain the structure and detail designs of our Interpretable Compositional Networks(ICNs),
+include folder contain the EO library,
+spaces folder contain the training data.
