@@ -20,7 +20,7 @@ $> ./compile_learn_ga.sh
 
 Run the program with the behavior data you want to learn 
 
-./bin/learn_cf_ga -n 9 -i spaces/The_file_you_want_to_learn
+$> ./bin/learn_cf_ga -n 9 -i spaces/The_file_you_want_to_learn
 
 
 
