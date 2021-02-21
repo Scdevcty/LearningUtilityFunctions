@@ -15,6 +15,7 @@ Please have more details about them in the ReadMe files in their own folders.
 Compile the main program to learn Utility Functions
 
 $> cd learn
+
 $> ./compile_learn_ga.sh
 
 Run the program with the behavior data you want to learn 
