@@ -1,12 +1,11 @@
 # Introduction:
-learn folder contains the main program in our project.
+learn folder contains the ICN and GA codes in our project.
 
 FightingICEv4.50 folder is one of our testing game, we build the game agent in this game.
 
-JsonToTXT folder is the data processing program to get the training data from the raw game data.
+Experiment data processing codes folder contains the data processing programs to get the training data from the raw game data, and process the training/testing outputs to get results.
 
-data folder contains the training data we use for different behavior patterns.
-
+4 behavior models of our experiments folder contains the 4 agent codes implemented using our training results in experiments.
 
 Please have more details about them in the ReadMe files in their own folders.
 
