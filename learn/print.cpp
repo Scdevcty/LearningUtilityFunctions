@@ -120,11 +120,11 @@ string con_operation( int number )
 	}	
 }
 
-void print_model( const Indi& indi )
+void print_model( const Indi& indi ,int number_actions)
 {
 	vector<int> vec( indi.size() );
 	std::copy( indi.begin(), indi.end(), vec.begin() );
-	print_model( vec );
+	print_model( vec, number_actions );
 }
 /*
 void print_model( const string& indi )
@@ -135,7 +135,7 @@ void print_model( const string& indi )
 	print_model( vec );
 }
 */
-void print_model( const vector<int>& indi )
+void print_model( const vector<int>& indi, int number_actions)
 {
 	int length=number_units_specification+number_units_combination+number_units_constant;
 	for(int i=0;i<number_actions;i++)

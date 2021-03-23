@@ -26,8 +26,10 @@
 
 using namespace std;
 
-int nb_vars;
+int nb_vars=8;
+int number_actions;
 vector<int> random_solutions;
+vector<int> action_index;
 string input_file_path;
 ifstream input_file;
 string line, string_number;
@@ -38,10 +40,9 @@ randutils::mt19937_rng rng_utils;
 
 void usage( char **argv )
 {
-	cout << "Usage: " << argv[0] << " -n NB_VARIABLES -i INPUT_FILE \n"
+	cout << "Usage: " << argv[0] << " -i INPUT_FILE \n"
 	     << "Arguments:\n"
 	     << "-h, --help, printing this message.\n"
-	     << "-n, --nb_vars NB_VARIABLES, the number of variables .\n"
 	     << "-i, --input INPUT_FILE containing sampled solutions.\n"
 	     << "--xp to print on the screen results for experiments only.\n";
 }
@@ -64,31 +65,13 @@ eoMinimizingFitness fitness( const Indi& indi )
 			weights[i/length][i%length]=1;
 		}
 	}
-	/*
-	int action_index[7]={17023,29612,38478,52378,61323,77755,101631};	
-	*/
-	/*
-	int action_index[7]={1934,3151,4059,5320,6154,7760,10211};
-	*/
-/*
-	int action_index[6]={1934,3151,4059,5320,6926,9377};
-*/
-/*
-	int action_index[5]={3874,5809,7415,8676,11127};	
-*/
-/*
-	int action_index[6]={3874.5809,7026,8632,9893,12344};
-*/
-/*
-	int action_index[4]={1934,3540,4801,7252};
-*/
-/*
-	int action_index[5]={1934,3151,4757,6018,8469};
-*/
+
 /*
 	int action_index[2]={4568,8737};
-*/
+	*/
+/*
 	int action_index[4]={2302,5559,6315,7665};
+*/
 	for( int i = 0; i < (int)random_solutions.size(); i += nb_vars )
 	{
 		vector<double> s(number_actions,0.0);
@@ -234,7 +217,7 @@ void fix( Indi& indi )
 //-----------------------------------------------------------------------------
 int main_function(int argc, char **argv)
 {
-	argh::parser cmdl( {  "-n", "--nb_vars", "-i", "--input"} );
+	argh::parser cmdl( { "-i", "--input"} );
 	cmdl.parse( argc, argv );
 	
 	if( cmdl[ { "-h", "--help"} ] )
@@ -242,14 +225,6 @@ int main_function(int argc, char **argv)
 		usage( argv );
 		return EXIT_SUCCESS;
 	}
-
-	if( ! cmdl( {"n", "nb_vars"} )   )
-	{
-		usage( argv );
-		return EXIT_FAILURE;
-	}
-
-	cmdl( {"n", "nb_vars"}, 9) >> nb_vars;
 
 	if( cmdl[ { "--xp" } ] )
 		xp = true;
@@ -268,10 +243,16 @@ int main_function(int argc, char **argv)
 		stringstream line_stream( line );
 		int number_samplings;
 		int number;
-		line_stream >> number_samplings;
-
+		line_stream >> number_actions;
+		while(line_stream >>string_number)
+		{
+			stringstream number_stream( string_number );
+			number_stream >> number;
+			action_index.push_back( number );			
+		}
+		number_samplings=action_index.back();
 		// loading solutions
-		for( int i = 0; i < number_samplings; ++i )
+		for( int i = 0; i <= number_samplings; ++i )
 		{
 			getline( input_file, line );
 			stringstream line_stream( line );
@@ -436,7 +417,7 @@ int main_function(int argc, char **argv)
 		     << "\nNumber of solutions: " << random_solutions.size() / nb_vars << endl;
 	
 		//print_model( pop[0] );
-		print_model( pop[index] );
+		print_model( pop[index] ,number_actions);
 	}
 	else
 		cout << pop[index] << "\n";
