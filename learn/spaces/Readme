@@ -1,0 +1,13 @@
+We have 4 designed behaviors to train:
+
+TOVOR_20:
+Training data for aggressive model, if we can't hit oppenent with punch, we keep moving forward to get close to it, when we get close enough we use punch.
+
+TOVOR_60:
+Training data for Defensive model, if we will be hit by oppenent right away, we use guard, if not, we use step back to keep away from oppenent.
+
+TOVOR_78:
+Training data for Hybrid 1(old) model, we use aggressive behavior at first, and if our HP is some lower than oppenent, we then use defensive behavior.
+
+TOVOR_100:
+Training data for Hybrid 2(new) model, we use defensive behavior at first, and if our HP is some lower than oppenent, we then use aggressive behavior.

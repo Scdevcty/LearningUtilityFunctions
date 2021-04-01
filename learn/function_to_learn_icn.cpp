@@ -212,23 +212,45 @@ void interpreter_specification( const int& number,
 		// enemy is attacking (positive)		
 	case 24:
 		outputs[index_active_unit]=(2*inputs[6]-1)/2;
-		//cout<<"case15:"<<outputs[index_active_unit]<<endl;
 		break;
 		// enemy is attacking (negative)	
 	case 25:
 		outputs[index_active_unit]=(1-2*inputs[6])/2;
-		//cout<<"case16:"<<outputs[index_active_unit]<<endl;
 		break;	
-		// agent can hit (postive)
+		// in attack distance (postive)
 	case 26:
-		outputs[index_active_unit]=(2*inputs[7]-1)/2;
-		//cout<<"case17:"<<outputs[index_active_unit]<<endl;
+	{
+		double distance=std::abs(inputs[2]-inputs[3]);
+		if(distance<=245.0)
+			outputs[index_active_unit]=0.5;
+		else
+			outputs[index_active_unit]=-0.5;
+	}
 		break;
-		// agent can hit (negative)
+		// in attack distance (negative)
 	case 27:
-		outputs[index_active_unit]=(1-2*inputs[7])/2;
-		//cout<<"case18:"<<outputs[index_active_unit]<<endl;
+	{
+		double distance=std::abs(inputs[2]-inputs[3]);
+		if(distance<=245.0)
+			outputs[index_active_unit]=-0.5;
+		else
+			outputs[index_active_unit]=0.5;
+	}
 		break;	
+		// agent is in corner (positive)
+	case 28:
+		if(inputs[2]>930.0 || inputs[2]<30.0)
+			outputs[index_active_unit]=0.5;
+		else
+			outputs[index_active_unit]=-0.5;
+		break;
+		// agent is in corner (negative)
+	case 29:
+		if(inputs[2]>930.0 || inputs[2]<30.0)
+			outputs[index_active_unit]=-0.5;
+		else
+			outputs[index_active_unit]=0.5;
+		break;
 /*
 		// enemy can hit (postive)
 	case 36:

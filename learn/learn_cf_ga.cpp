@@ -26,8 +26,10 @@
 
 using namespace std;
 
-int nb_vars;
+int nb_vars=8;
+int number_actions;
 vector<int> random_solutions;
+vector<int> action_index;
 string input_file_path;
 ifstream input_file;
 string line, string_number;
@@ -38,10 +40,9 @@ randutils::mt19937_rng rng_utils;
 
 void usage( char **argv )
 {
-	cout << "Usage: " << argv[0] << " -n NB_VARIABLES -i INPUT_FILE \n"
+	cout << "Usage: " << argv[0] << " -i INPUT_FILE \n"
 	     << "Arguments:\n"
 	     << "-h, --help, printing this message.\n"
-	     << "-n, --nb_vars NB_VARIABLES, the number of variables .\n"
 	     << "-i, --input INPUT_FILE containing sampled solutions.\n"
 	     << "--xp to print on the screen results for experiments only.\n";
 }
@@ -64,31 +65,13 @@ eoMinimizingFitness fitness( const Indi& indi )
 			weights[i/length][i%length]=1;
 		}
 	}
-	/*
-	int action_index[7]={17023,29612,38478,52378,61323,77755,101631};	
-	*/
-	/*
-	int action_index[7]={1934,3151,4059,5320,6154,7760,10211};
-	*/
-/*
-	int action_index[6]={1934,3151,4059,5320,6926,9377};
-*/
-/*
-	int action_index[5]={3874,5809,7415,8676,11127};	
-*/
-/*
-	int action_index[6]={3874.5809,7026,8632,9893,12344};
-*/
-/*
-	int action_index[4]={1934,3540,4801,7252};
-*/
-/*
-	int action_index[5]={1934,3151,4757,6018,8469};
-*/
+
 /*
 	int action_index[2]={4568,8737};
-*/
+	*/
+/*
 	int action_index[4]={2302,5559,6315,7665};
+*/
 	for( int i = 0; i < (int)random_solutions.size(); i += nb_vars )
 	{
 		vector<double> s(number_actions,0.0);
@@ -234,7 +217,7 @@ void fix( Indi& indi )
 //-----------------------------------------------------------------------------
 int main_function(int argc, char **argv)
 {
-	argh::parser cmdl( {  "-n", "--nb_vars", "-i", "--input"} );
+	argh::parser cmdl( { "-i", "--input"} );
 	cmdl.parse( argc, argv );
 	
 	if( cmdl[ { "-h", "--help"} ] )
@@ -242,14 +225,6 @@ int main_function(int argc, char **argv)
 		usage( argv );
 		return EXIT_SUCCESS;
 	}
-
-	if( ! cmdl( {"n", "nb_vars"} )   )
-	{
-		usage( argv );
-		return EXIT_FAILURE;
-	}
-
-	cmdl( {"n", "nb_vars"}, 9) >> nb_vars;
 
 	if( cmdl[ { "--xp" } ] )
 		xp = true;
@@ -268,10 +243,16 @@ int main_function(int argc, char **argv)
 		stringstream line_stream( line );
 		int number_samplings;
 		int number;
-		line_stream >> number_samplings;
-
+		line_stream >> number_actions;
+		while(line_stream >>string_number)
+		{
+			stringstream number_stream( string_number );
+			number_stream >> number;
+			action_index.push_back( number );			
+		}
+		number_samplings=action_index.back();
 		// loading solutions
-		for( int i = 0; i < number_samplings; ++i )
+		for( int i = 0; i <= number_samplings; ++i )
 		{
 			getline( input_file, line );
 			stringstream line_stream( line );
@@ -291,10 +272,11 @@ int main_function(int argc, char **argv)
 	const unsigned int T_SIZE = 2;        // size for tournament selection
 	const unsigned int VEC_SIZE = (number_units_specification + number_units_combination + number_units_constant)*number_actions ;    // Number of bits in genotypes
 	const unsigned int POP_SIZE = 100;  // Size of population
-	const unsigned int MAX_GEN = 400;  // Maximum number of generation before STOP
-	const float CROSS_RATE = 0.8;          // Crossover rate
+	const unsigned int STEADY_GEN = 15;  // Number of generations with no improvements before STOP
+	const unsigned int MIN_GEN = 200;  // Minimum number of generation before STOP
+	const float CROSS_RATE = 0.6;          // Crossover rate
 	const float MUT_RATE = 1.0;              // mutation rate
-	const float REP_RATE = 0.05;				// replacement rate
+	const float REP_RATE = 0.17;				// replacement rate
 
 	//////////////////////////
 	//  Random seed
@@ -370,8 +352,12 @@ int main_function(int argc, char **argv)
 	// termination conditions: use more than one
 	/////////////////////////////////////
 	// stop after MAX_GEN generations
-	eoGenContinue<Indi> genCont( MAX_GEN );
-	eoCombinedContinue<Indi> continuator( genCont );
+	//eoGenContinue<Indi> genCont( MAX_GEN );
+	//eoCombinedContinue<Indi> continuator( genCont );
+
+	// does a minimum number of generations, then stops whenever a given number of generations takes place without improvement.
+	eoSteadyFitContinue<Indi> steadyFit( MIN_GEN, STEADY_GEN); 
+	eoCombinedContinue<Indi> continuator( steadyFit );
 
 	/////////////////////////////////////////
 	// the algorithm
@@ -389,18 +375,53 @@ int main_function(int argc, char **argv)
 	if( !xp )
 		cout << "FINAL Population\n" << pop << "\n";
 
-	eval(pop[0]);
+	//eval(pop[0]);
+
+	auto best_fitness = pop[0].fitness();
+	int number_ex_aequo;
+	for( number_ex_aequo = 0 ; pop[number_ex_aequo].fitness() == best_fitness ; ++number_ex_aequo ) ; // empty loop
+
+	std::map<std::string,int> count_vectors;
+	for( int i = 0; i < number_ex_aequo ; ++i )
+	{
+		std::ostringstream vector_stream;
+		std::copy(pop[i].begin(), pop[i].end(), std::ostream_iterator<bool>(vector_stream, ""));
+		++count_vectors[ vector_stream.str() ];
+	}
+
+	std::string more_frequent_vector;
+	int highest_frequency = 0;
+	
+	for( auto& m : count_vectors )
+		if( highest_frequency < m.second )
+		{
+			highest_frequency = m.second;
+			more_frequent_vector = m.first;
+		}
+
+	int index;
+	for( index = 0; index < number_ex_aequo ; ++index )
+	{
+		std::ostringstream vector_stream;
+		std::copy(pop[index].begin(), pop[index].end(), std::ostream_iterator<bool>(vector_stream, ""));
+		if( vector_stream.str().compare( more_frequent_vector ) == 0 )
+			break;
+	}
+
 	
 	if( !xp )
 	{
-		cout << "Best individual11: " << pop[0]
+		//cout << "Best individual11: " << pop[0]
+		cout << "Best individual11: " << more_frequent_vector
 		     << "\nNumber of variables: " << nb_vars
 		     << "\nNumber of solutions: " << random_solutions.size() / nb_vars << endl;
 	
-		print_model( pop[0] );
+		//print_model( pop[0] );
+		print_model( pop[index] ,number_actions);
 	}
 	else
-		cout << pop[0] << "\n";
+		cout << pop[index] << "\n";
+		//cout << pop[0] << "\n";
 
 	return EXIT_SUCCESS;
 }
