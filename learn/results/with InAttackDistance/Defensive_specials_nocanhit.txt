@@ -21,3 +21,5 @@ median individual:
 average result:
 314.23 0.8370010379929499 0.16299896200704936 
 
+standard deviation:
+22.58736593762098 
